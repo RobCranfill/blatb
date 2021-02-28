@@ -11,3 +11,17 @@ I wasn't sure what range of values the sensor returns, so I included code to dum
 This isn't necessary and I guess I may remove that in the near future. The included shell script
 finds the min and max of those values.
 
+
+## Prerequisites
+* Hardware
+  * RPi & Raspian
+  * An attached Adafruit VEML7700 light sensor (see above link)
+  * Must enable I2C (using raspi-config)
+  * Must restart after updating udev rules
+
+* Software libraries
+  * adafruit_veml7700
+	  * `pip3 install adafruit-circuitpython-veml7700`
+  (this will also install various other Adafruit "Circuit Python" libraries.)
+  * rpi-backlight
+	  * `pip3 install rpi-backlight`
