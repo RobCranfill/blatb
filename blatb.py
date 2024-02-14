@@ -13,7 +13,7 @@ import math
 import board
 import busio
  
-TEST = True 
+TEST = False
 LOG = True
 LOG_FILE_NAME = "blatb-data.log"
 BRIGHTNESS_FLOOR = 10 
@@ -40,14 +40,14 @@ def luxToLCDLevel(luxIn):
     result = 100
   if result < BRIGHTNESS_FLOOR:
     result = BRIGHTNESS_FLOOR
-  print(f"luxToLCDLevel: {luxIn} -> {result}")
+  print(f"  luxToLCDLevel: {luxIn:0.2f} -> {result:0.2f}")
   return result
 
 
 if __name__ == "__main__":
 
   if TEST:
-    print("Test mode - NOT setting")
+    print("Test mode - NOT setting backlight level")
 
   i2c = busio.I2C(board.SCL, board.SDA)
   veml7700 = adafruit_veml7700.VEML7700(i2c)
@@ -63,18 +63,20 @@ if __name__ == "__main__":
 #   KeyError: 6
   veml7700.light_integration_time = veml7700.ALS_100MS
         
-    
+
   lux = veml7700.lux
-  print(f"Ambient light: {veml7700.light:.0f}, Lux: {lux:.0f}")
+  print(f"Ambient light: {veml7700.light:0.2f}, Lux: {lux:0.2f}")
 
-  bl = int(luxToLCDLevel(lux))
-  print(f" -> Set backlight to {bl}%")
+  level = int(luxToLCDLevel(lux))
+  print(f" -> Set backlight to {level:2.0f}%")
 
-  if LOG:
-    logfile = open(LOG_FILE_NAME, "a")
-    now = datetime.now()
-    logfile.write(f"{now}\t{veml7700.light:.0f}\t{lux:.0f}\t{bl}\n")
-    logfile.close() 
-  if not TEST:
-    fadeTo(bl, 0.5)
+  logfile = open(LOG_FILE_NAME, "a")
+  if TEST:
+    logfile.write("Test mode - NOT setting backlight level!\n")
+  else:
+    if LOG:
+      now = datetime.now()
+      logfile.write(f"{now}\t{veml7700.light:.0f}\t{lux:.0f}\t{level}\n")
+    fadeTo(level, 0.5)
+  logfile.close()
 
