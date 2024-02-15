@@ -7,16 +7,17 @@
   robcranfill@gmail.com
 """
 import adafruit_veml7700
-from rpi_backlight import Backlight
-from datetime import datetime
-import sys
-import time
-import math
 import board
 import busio
+from rpi_backlight import Backlight
+
+import argparse
+from datetime import datetime
+import math
+import sys
+import time
  
-TEST = False
-LOG = True
+
 LOG_FILE_NAME = "blatb-data.log"
 BRIGHTNESS_FLOOR = 10 
 
@@ -48,7 +49,7 @@ def luxToLCDLevel(luxIn):
     result = 100
   if result < BRIGHTNESS_FLOOR:
     result = BRIGHTNESS_FLOOR
-  print(f"  luxToLCDLevel: {luxIn:0.2f} -> {result:0.2f}")
+  # print(f"  luxToLCDLevel: {luxIn:0.2f} -> {result:0.2f}")
   return result
 
 
@@ -56,12 +57,20 @@ def luxToLCDLevel(luxIn):
 #
 if __name__ == "__main__":
 
-  # print(f"Arguments count: {len(sys.argv)}")
-  # for i, arg in enumerate(sys.argv):
-  #     print(f"Argument {i:>6}: {arg}")
+  parser = argparse.ArgumentParser(
+              prog='blatb',
+              description='Set RPi backlight according to VEML7700 light sensor.',
+              epilog='')
+  
+  parser.add_argument('-d', '--data', action='store_true')
+  parser.add_argument('-t', '--test', action='store_true')
 
-  if TEST:
-    print("Test mode - NOT setting backlight level")
+  args = parser.parse_args()
+  # print(f"args.data: {args.data}, args.test: {args.test}")
+
+  dump_data = args.data
+  test_mode = args.test
+
 
   try:
     
@@ -72,35 +81,38 @@ if __name__ == "__main__":
       print("Error connecting to VEML7700 sensor; is there one?")
       sys.exit(EXIT_VALUE_SENSOR)
 
-  # prevent this error? (is this the best way?)
-  #     File "/home/pi/.local/lib/python3.7/site-packages/adafruit_veml7700.py", line 194, in integration_time_value
-  #       return self.integration_time_values[integration_time]
-  #   KeyError: 6
-    veml7700.light_integration_time = veml7700.ALS_100MS
-    
-    # This measures the light, in "lux" units.
-    lux = veml7700.lux
-    print(f"Ambient light: {veml7700.light:0.2f}, Lux: {lux:0.2f}")
-
-    level = int(luxToLCDLevel(lux))
-    print(f" -> Set backlight to {level:2.0f}%")
-
     try:
-      logfile = open(LOG_FILE_NAME, "a")
-      if TEST:
-        logfile.write("Test mode - NOT setting backlight level!\n")
+
+      # prevent integration_time_value error. (is this the best way?)
+      #     File "/home/pi/.local/lib/python3.7/site-packages/adafruit_veml7700.py", line 194, in integration_time_value
+      #       return self.integration_time_values[integration_time]
+      #   KeyError: 6
+      veml7700.light_integration_time = veml7700.ALS_100MS
+      
+      # This measures the light, in "lux" units.
+      lux = veml7700.lux
+      print(f"Ambient light: {veml7700.light:0.2f}, Lux: {lux:0.2f}")
+
+      level = int(luxToLCDLevel(lux))
+
+      if dump_data:
+        logfile = open(LOG_FILE_NAME, "a")
+        now = datetime.now()
+        logfile.write(f"{now}\t{veml7700.light:.0f}\t{lux:.0f}\t{level}\n")
+        logfile.close() 
+
+      if test_mode:
+        print("Test mode - NOT setting backlight level!")
       else:
-        if LOG:
-          now = datetime.now()
-          logfile.write(f"{now}\t{veml7700.light:.0f}\t{lux:.0f}\t{level}\n")
+        print(f"  Set backlight to {level:2.0f}%")
         fadeTo(level, 0.5)
-      logfile.close()
-    except:
-      print("Error logging output!")
+  
+    except Exception as e:
+      print(f"Error writing data! {e}")
       sys.exit(EXIT_VALUE_LOGGING)
 
   except Exception as e:
-    print(f"{e}")
+    print(f"Exception {e}")
     sys.exit(EXIT_VALUE_OTHER)
 
   finally:
