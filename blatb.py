@@ -22,9 +22,9 @@ LOG_FILE_NAME = "blatb-data.log"
 BRIGHTNESS_FLOOR = 10 
 
 # exit values
-EXIT_VALUE_SENSOR = 1
+EXIT_VALUE_SENSOR  = 1
 EXIT_VALUE_LOGGING = 2
-EXIT_VALUE_OTHER = 3
+EXIT_VALUE_OTHER   = 3
 
 
 # Set the backlight to the indicated percent (0-100), over the given fade time.
@@ -58,12 +58,12 @@ def luxToLCDLevel(luxIn):
 if __name__ == "__main__":
 
   parser = argparse.ArgumentParser(
-              prog='blatb',
-              description='Set RPi backlight according to VEML7700 light sensor.',
-              epilog='')
+              prog="blatb",
+              description="Set RPi backlight according to VEML7700 light sensor.",
+              epilog="")
   
-  parser.add_argument('-d', '--data', action='store_true')
-  parser.add_argument('-t', '--test', action='store_true')
+  parser.add_argument("-d", "--data", action="store_true")
+  parser.add_argument("-t", "--test", action="store_true")
 
   args = parser.parse_args()
   # print(f"args.data: {args.data}, args.test: {args.test}")
