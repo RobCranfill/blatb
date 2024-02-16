@@ -4,7 +4,5 @@
 # 
 # m h dom mon dow  command
 
-
 # set backlight according to ambient light - every minute!
-* * * * * /home/pi/proj/blatb/blatb.sh >> /home/pi/proj/blatb/cron-blatb.log 2>&1
-
+* * * * * /home/pi/proj/blatb/blatb.sh >> /home/pi/proj/blatb/blatb-run.log 2>&1

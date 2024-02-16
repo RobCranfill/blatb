@@ -66,11 +66,8 @@ if __name__ == "__main__":
   parser.add_argument("-t", "--test", action="store_true")
 
   args = parser.parse_args()
-  # print(f"args.data: {args.data}, args.test: {args.test}")
-
   dump_data = args.data
   test_mode = args.test
-
 
   try:
     
@@ -89,22 +86,24 @@ if __name__ == "__main__":
       #   KeyError: 6
       veml7700.light_integration_time = veml7700.ALS_100MS
       
-      # This measures the light, in "lux" units.
-      lux = veml7700.lux
-      print(f"Ambient light: {veml7700.light:0.2f}, Lux: {lux:0.2f}")
+      # This measures the light, also in "lux" units.
+      light = veml7700.light
+      lux   = veml7700.lux
+      # print(f"Ambient light: {light:0.2f}, Lux: {lux:0.2f}")
 
       level = int(luxToLCDLevel(lux))
+      now = datetime.now().strftime('%x %X')
 
       if dump_data:
         logfile = open(LOG_FILE_NAME, "a")
-        now = datetime.now()
-        logfile.write(f"{now}\t{veml7700.light:.0f}\t{lux:.0f}\t{level}\n")
+        logfile.write(f"{now}\t{light:.0f}\t{lux:.0f}\t{level}\n")
         logfile.close() 
 
       if test_mode:
         print("Test mode - NOT setting backlight level!")
       else:
-        print(f"  Set backlight to {level:2.0f}%")
+        print(f"{now} Ambient light: {light:0.2f}, Lux: {lux:0.2f} -> Set backlight to {level:2.0f}%")
+        # print(f"  Set backlight to {level:2.0f}%")
         fadeTo(level, 0.5)
   
     except Exception as e:
